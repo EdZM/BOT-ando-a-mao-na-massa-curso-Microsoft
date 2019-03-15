@@ -7,10 +7,13 @@ const { ActivityTypes, MessageFactory } = require('botbuilder');
  * A bot that responds to input from suggested actions.
  */
 class SuggestedActionsBot {
-    let order;
-    let type;
-    let address;
-
+    constructor(convestationState, order, type, address){
+        this.convestationState = convestationState;
+        this.order = order;
+        this.type = type;
+        this.address = address;
+    }
+    
     /**
      * Every conversation turn for our SuggestedActionsbot will call this method.
      * There are no dialogs used, since it's "single turn" processing, meaning a single request and
@@ -24,8 +27,8 @@ class SuggestedActionsBot {
 
             // Create an array with the valid color options.
             const validOptions = ['Cardapio', 'Pedido'];
-            const validOrders;
-            const validTypes;
+            const validOrders = ['Combo Burger', 'Combo Calabresa', 'Combo Lombo', 'Combo Americano'];
+            const validTypes = ['Lanche Simples', 'Lanche Duplo'];
 
             // If the `text` is in the Array, a valid color was selected and send agreement.
             if (validOptions.includes(text)) {
@@ -52,9 +55,10 @@ class SuggestedActionsBot {
             }
             else {
                 if(order && type && address){
-                    aw
-                }
+                    await this.sendActivity('Seu pedido de ' + this.order + ' ' + this.type + ' está sendo preparado e será enviado para ' + this.address);
+                }else {
                 await turnContext.sendActivity('Por favor escolha uma opção válida');
+                }
             }
 
             // After the bot has responded send the suggested actions.
