@@ -7,6 +7,10 @@ const { ActivityTypes, MessageFactory } = require('botbuilder');
  * A bot that responds to input from suggested actions.
  */
 class SuggestedActionsBot {
+    let order;
+    let type;
+    let address;
+
     /**
      * Every conversation turn for our SuggestedActionsbot will call this method.
      * There are no dialogs used, since it's "single turn" processing, meaning a single request and
@@ -19,13 +23,38 @@ class SuggestedActionsBot {
             const text = turnContext.activity.text;
 
             // Create an array with the valid color options.
-            const validColors = ['Red', 'Blue', 'Yellow'];
+            const validOptions = ['Cardapio', 'Pedido'];
+            const validOrders;
+            const validTypes;
 
             // If the `text` is in the Array, a valid color was selected and send agreement.
-            if (validColors.includes(text)) {
-                await turnContext.sendActivity(`I agree, ${ text } is the best color.`);
-            } else {
-                await turnContext.sendActivity('Please select a color.');
+            if (validOptions.includes(text)) {
+                if (text === 'Cardapio') {
+                    await turnContext.sendActivity('Cardapio do dia Combos (Lanche + batata + refrigerante)');
+                    await turnContext.sendActivity('Combo Burger - R$ 15.00 (simples), R$18.00 (duplo)');
+                    await turnContext.sendActivity('Combo Calabresa - R$ 16.00 (simples), R$19.00 (duplo)');
+                    await turnContext.sendActivity('Combo Lombo - R$ 17.00 (simples), R$19.00 (duplo)');
+                    await turnContext.sendActivity('Combo Bacon - R$ 18.00 (simples), R$19.00 (duplo)');
+                    await turnContext.sendActivity('Combo Americano - R$ 18.00 (simples), R$20.00 (duplo)');
+                }
+                else {
+                    await this.sendOrderActions(turnContext);
+                }
+            }
+            else if (validOrders.includes(text)){
+                this.order = text;
+                var reply = MessageFactory.suggestedActions(['Lanche Simples', 'Lanche Duplo'], 'Qual o tipo do lanche?')
+                await this.sendActivity(reply);
+            }
+            else if (validTypes.includes(text)){
+                this.type = text;
+                await this.sendActivity('Por favor me diga seu endereço:');
+            }
+            else {
+                if(order && type && address){
+                    aw
+                }
+                await turnContext.sendActivity('Por favor escolha uma opção válida');
             }
 
             // After the bot has responded send the suggested actions.
@@ -62,7 +91,15 @@ class SuggestedActionsBot {
      * @param {TurnContext} turnContext A TurnContext instance containing all the data needed for processing this conversation turn.
      */
     async sendSuggestedActions(turnContext) {
-        var reply = MessageFactory.suggestedActions(['Red', 'Yellow', 'Blue'], 'What is the best color?');
+        var options = ['Cardapio', 'Pedido'];
+        var reply = MessageFactory.suggestedActions(options, 'Lanchin do Bujatin o que vc deseja?');
+        await turnContext.sendActivity(reply);
+    }
+
+    async sendOrderActions(turnContext) {
+        var orders = ['Combo Burger', 'Combo Calabresa', 'Combo Lombo', 'Combo Americano'];
+        
+        var reply = MessageFactory.suggestedActions(orders, 'Escolha seu pedido:');
         await turnContext.sendActivity(reply);
     }
 }
