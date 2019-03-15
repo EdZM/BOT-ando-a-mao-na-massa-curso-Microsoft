@@ -7,8 +7,7 @@ const { ActivityTypes, MessageFactory } = require('botbuilder');
  * A bot that responds to input from suggested actions.
  */
 class SuggestedActionsBot {
-    constructor(convestationState, order, type, address){
-        this.convestationState = convestationState;
+    constructor(order, type, address){
         this.order = order;
         this.type = type;
         this.address = address;
@@ -39,30 +38,28 @@ class SuggestedActionsBot {
                     await turnContext.sendActivity('Combo Lombo - R$ 17.00 (simples), R$19.00 (duplo)');
                     await turnContext.sendActivity('Combo Bacon - R$ 18.00 (simples), R$19.00 (duplo)');
                     await turnContext.sendActivity('Combo Americano - R$ 18.00 (simples), R$20.00 (duplo)');
+                    await this.sendSuggestedActions(turnContext);
                 }
                 else {
                     await this.sendOrderActions(turnContext);
                 }
             }
-            else if (validOrders.includes(text)){
+            else if (validOrders.includes(text)) {
                 this.order = text;
-                var reply = MessageFactory.suggestedActions(['Lanche Simples', 'Lanche Duplo'], 'Qual o tipo do lanche?')
-                await this.sendActivity(reply);
+                var reply = MessageFactory.suggestedActions(['Lanche Simples', 'Lanche Duplo'], 'Qual o tipo do lanche?');
+                await turnContext.sendActivity(reply);
             }
-            else if (validTypes.includes(text)){
+            else if (validTypes.includes(text)) {
                 this.type = text;
-                await this.sendActivity('Por favor me diga seu endereço:');
+                await turnContext.sendActivity('Por favor me diga seu endereço:');
             }
             else {
-                if(order && type && address){
-                    await this.sendActivity('Seu pedido de ' + this.order + ' ' + this.type + ' está sendo preparado e será enviado para ' + this.address);
-                }else {
-                await turnContext.sendActivity('Por favor escolha uma opção válida');
-                }
+                this.address = text;
+                await turnContext.sendActivity('Seu pedido de ' + this.order + ' ' + this.type + ' está sendo preparado e será enviado para ' + this.address);
+                this.sendSuggestedActions(turnContext);
             }
 
             // After the bot has responded send the suggested actions.
-            await this.sendSuggestedActions(turnContext);
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate) {
             await this.sendWelcomeMessage(turnContext);
         } else {
@@ -80,9 +77,8 @@ class SuggestedActionsBot {
             // Iterate over all new members added to the conversation.
             for (const idx in activity.membersAdded) {
                 if (activity.membersAdded[idx].id !== activity.recipient.id) {
-                    const welcomeMessage = `Welcome to suggestedActionsBot ${ activity.membersAdded[idx].name }. ` +
-                        `This bot will introduce you to Suggested Actions. ` +
-                        `Please select an option:`;
+                    const welcomeMessage = `Bem vindo ao Lanchin do Bujatin ` +
+                        `Estamos atendendo pedidos hoje`;
                     await turnContext.sendActivity(welcomeMessage);
                     await this.sendSuggestedActions(turnContext);
                 }
@@ -102,7 +98,6 @@ class SuggestedActionsBot {
 
     async sendOrderActions(turnContext) {
         var orders = ['Combo Burger', 'Combo Calabresa', 'Combo Lombo', 'Combo Americano'];
-        
         var reply = MessageFactory.suggestedActions(orders, 'Escolha seu pedido:');
         await turnContext.sendActivity(reply);
     }
